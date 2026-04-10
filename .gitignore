@@ -1,0 +1,12 @@
+__pycache__/
+.env
+images/
+.venv
+tmp_trainer/
+materials/
+workshops/
+cache/
+results/
+originals/
+logs/
+experiments/
