@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 MODEL_CACHE_DIR = os.getenv("MODEL_CACHE_DIR", "cache")
 LOGGING_DIR = os.getenv("LOGGING_DIR", "logs")
 
-TOTAL_TIMESTEPS = int(os.getenv("TOTAL_TIMESTEPS", 10))
+TOTAL_TIMESTEPS = int(os.getenv("TOTAL_TIMESTEPS", 500_000))
 LEARNING_RATE = float(os.getenv("LEARNING_RATE", 0.00083))
 GAMMA = float(os.getenv("GAMMA", 0.995))
 

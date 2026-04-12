@@ -110,7 +110,7 @@ class Experimenter:
             algorithm=experiment.algorithm,
             policy=experiment.policy,
             cache_dir=self.__config.cache_dir,
-            logging_dir=self.__config.logging_dir,
+            logging_dir=f"{self.__config.logging_dir}/{state.current_experiment_id}",
             random_seed=experiment.random_seed,
         )
 

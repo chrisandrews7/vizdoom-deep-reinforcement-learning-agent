@@ -95,7 +95,7 @@ class Agent:
 
     def evaluate(self) -> Evaluation:
         environment = make_environment(
-            self.__random_seed, logs_dir=None, total_environments=9
+            self.__random_seed, logs_dir=None, total_environments=1
         )
 
         model = self.__algorithm.load(

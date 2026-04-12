@@ -38,5 +38,6 @@ def make_environment(
     )
     # History for temporal context
     environment = VecFrameStack(environment, n_stack=4)
-    # Rearrange to required format
+
+    # Ensure its in the required format
     return VecTransposeImage(environment)
