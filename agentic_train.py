@@ -11,12 +11,14 @@ logging.basicConfig(level=logging.INFO)
 MODEL_CACHE_DIR = os.getenv("MODEL_CACHE_DIR", "cache")
 LOGGING_DIR = os.getenv("LOGGING_DIR", "logs")
 EXPERIMENTS_DIR = os.getenv("EXPERIMENTS_DIR", "experiments")
+MAX_EXPERIMENTS = int(os.getenv("MAX_EXPERIMENTS", 50))
 
 if __name__ == "__main__":
     config = BaseConfig(
         experiments_dir=EXPERIMENTS_DIR,
         cache_dir=MODEL_CACHE_DIR,
         logging_dir=LOGGING_DIR,
+        max_experiments=MAX_EXPERIMENTS,
     )
     experimenter = Experimenter(config)
 

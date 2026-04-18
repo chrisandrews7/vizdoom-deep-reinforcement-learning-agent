@@ -9,6 +9,10 @@ from src.evaluation import Evaluation
 
 
 class Agent:
+    """
+    Deep reinforcement learning Agent
+    """
+
     __model_cache_path: str
     __logging_dir: str
     __algorithm: type[OffPolicyAlgorithm] | type[OnPolicyAlgorithm]
@@ -31,10 +35,15 @@ class Agent:
         self.__random_seed = random_seed
 
     def train(self, total_timesteps: int, learning_rate: float, gamma: float):
+        """
+        Train the agent by playing
+        """
+        total_environments = 8
         training_environment = make_environment(
             self.__random_seed,
             logs_dir=f"{self.__logging_dir}/train",
-            total_environments=8,
+            # Parallelise the learning
+            total_environments=total_environments,
         )
         evaluation_environment = make_environment(self.__random_seed, logs_dir=None)
 
@@ -42,13 +51,15 @@ class Agent:
             evaluation_environment,
             best_model_save_path=self.__model_cache_path,
             log_path=f"{self.__logging_dir}/evaluation",
-            eval_freq=10_000,
+            # Required so the model saves even if a few timesteps
+            eval_freq=min(10_000, total_timesteps // total_environments),
             n_eval_episodes=5,
             deterministic=True,
             render=False,
         )
 
         buffer_args = (
+            # Something managable without running out of memory
             {"buffer_size": 50_000}
             if issubclass(self.__algorithm, OffPolicyAlgorithm)
             else {}
@@ -64,7 +75,7 @@ class Agent:
         )
 
         logging.info(
-            f"Starting training for {total_timesteps} timesteps at a rate of {learning_rate} and gamma {gamma}"
+            f"Starting training using {self.__algorithm.__name__} for {total_timesteps} timesteps at a rate of {learning_rate} and gamma {gamma}"
         )
 
         start = time()
@@ -74,7 +85,10 @@ class Agent:
         )
         self.__train_time = time() - start
 
-    def watch(self):
+    def watch(self, run_time: int):
+        """
+        View a agent playing a game using a pretrained model
+        """
         environment = make_environment(self.__random_seed, logs_dir=None)
 
         model = self.__algorithm.load(
@@ -87,13 +101,16 @@ class Agent:
             raise ValueError("environment is broken")
 
         observation = environment.reset()
-        for i in range(10000):
+        for i in range(run_time):
             action, _ = model.predict(observation, deterministic=True)
 
             environment.step(action)
             environment.render("human")
 
     def evaluate(self) -> Evaluation:
+        """
+        Evaluate the agents performance
+        """
         environment = make_environment(
             self.__random_seed, logs_dir=None, total_environments=1
         )

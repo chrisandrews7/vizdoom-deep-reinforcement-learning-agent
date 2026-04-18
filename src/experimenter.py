@@ -17,6 +17,7 @@ class BaseConfig:
     experiments_dir: str
     cache_dir: str
     logging_dir: str
+    max_experiments: int | None = None
 
 
 @dataclass
@@ -39,6 +40,10 @@ class State:
 
 
 class Experimenter:
+    """
+    Agentic AI for finding most performant hyperparameters
+    """
+
     __config: BaseConfig
 
     def __init__(self, config: BaseConfig):
@@ -48,6 +53,7 @@ class Experimenter:
 
         graph.add_edge("plan", "run")
         graph.set_entry_point("plan")
+        # End edge
         graph.add_conditional_edges(
             "run", self.__should_continue, {"plan": "plan", "end": END}
         )
@@ -57,6 +63,9 @@ class Experimenter:
         self.__llm = LLM()
 
     def run(self, experiments: dict[str, Experiment]) -> Tuple[Experiment, Evaluation]:
+        """
+        Start the agents journey
+        """
         state = State(
             # State isnt returned typed but as a dict, must recast it
             **self.__workflow.invoke(
@@ -64,6 +73,7 @@ class Experimenter:
             )
         )
 
+        # Return the best experiment and evaluation based on whatever the evaluation defined as score
         best_experiment_id = max(
             state.evaluations, key=lambda key: state.evaluations[key].score
         )
@@ -73,6 +83,9 @@ class Experimenter:
         )
 
     def __plan(self, state: State) -> State:
+        """
+        Find the best experiment to run next
+        """
         remaining_experiments = self.__remaining_experiments(state)
         logging.info(f"{len(remaining_experiments)} experiments remaining")
 
@@ -86,6 +99,7 @@ class Experimenter:
             experiments=remaining_experiments,
         )
 
+        # This would benefit from some better parsing logic if the agent returns "54" instead of 54
         if next_experiment_id not in remaining_experiments:
             logging.warning(f'LLM experiment "{next_experiment_id}" is not valid')
             state.current_experiment_id = next(iter(remaining_experiments))
@@ -100,6 +114,9 @@ class Experimenter:
         return state
 
     def __run(self, state: State) -> State:
+        """
+        Execute the experiment and report evaluation
+        """
         if state.current_experiment_id not in state.experiments:
             raise ValueError(f"{state.current_experiment_id} not found in experiments")
 
@@ -129,6 +146,7 @@ class Experimenter:
         if self.__config.experiments_dir != "":
             # Save as we go to avoid total loss
             makedirs(self.__config.experiments_dir, exist_ok=True)
+            # JSONL so we can use newlines and append only
             file_name = f"{self.__config.experiments_dir}/experiments.jsonl"
             with open(file_name, "a") as file:
                 dump(
@@ -152,9 +170,21 @@ class Experimenter:
         return state
 
     def __should_continue(self, state: State) -> str:
+        """
+        Breakout of the loop
+        """
+        if (
+            self.__config.max_experiments is not None
+            and len(state.evaluations) >= self.__config.max_experiments
+        ):
+            return "end"
+
         return "plan" if self.__remaining_experiments(state) else "end"
 
     def __remaining_experiments(self, state: State) -> dict[str, Experiment]:
+        """
+        Single source of truth for experiments remaining to be run
+        """
         return {
             key: value
             for key, value in state.experiments.items()

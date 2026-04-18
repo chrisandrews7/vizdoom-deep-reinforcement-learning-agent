@@ -4,6 +4,10 @@ from numpy import mean, std
 
 @dataclass
 class Evaluation:
+    """
+    Evaluate an agent and return a set of common model evaluation metrics
+    """
+
     mean_episode_reward: float
     std_episode_reward: float
     mean_steps_per_episode: float
@@ -26,6 +30,7 @@ class Evaluation:
         self.std_episode_reward = float(std(episode_rewards))
         self.mean_steps_per_episode = float(mean(episode_lengths))
 
+        # This is a measure of overall performance
         self.score = self.mean_episode_reward
 
         self.train_time = train_time

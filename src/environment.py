@@ -13,8 +13,11 @@ from stable_baselines3.common.vec_env import (
 import vizdoom.gymnasium_wrapper
 
 
-# Reduce size to something manageable
 class ObservationWrapper(GObservationWrapper):
+    """
+    Optimised observations to reduce size to something manageable
+    """
+
     def __init__(self, env):
         super().__init__(env)
         self.observation_space = Box(0, 255, shape=(80, 100, 1), dtype=uint8)
@@ -28,6 +31,9 @@ class ObservationWrapper(GObservationWrapper):
 def make_environment(
     seed: int, logs_dir: str | None, total_environments: int = 1
 ) -> VecEnv:
+    """
+    Helper to create environments
+    """
     environment = make_vec_env(
         "VizdoomDefendCenter-v1",
         n_envs=total_environments,
