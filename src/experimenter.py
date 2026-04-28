@@ -160,7 +160,7 @@ class Experimenter:
                         ),
                     },
                     file,
-                    default=str,
+                    default=lambda value: getattr(value, "__name__", str(value)),
                 )
                 file.write("\n")
             logging.info(

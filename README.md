@@ -8,6 +8,9 @@ Testing 3 different learning algorithms:
 
 It uses an Agentic AI layer to find the most performant hyperparameters.
 
+![Agent playing DefendCenter](./images/example.png)
+
+
 ## Installation
 
 - Install [uv](https://github.com/astral-sh/uv) package manager.
@@ -35,3 +38,8 @@ All configurable environment variables and experiments can be found in [agentic_
 ```bash
 ENV=.env make agentic-train
 ```
+
+## Results
+
+Evaluations on the algorithms are available [here](./analysis.ipynb).
+
